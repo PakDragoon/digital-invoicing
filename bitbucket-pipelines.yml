@@ -1,0 +1,28 @@
+image: atlassian/default-image:latest
+
+pipelines:
+  branches:
+    main:
+      - step:
+          name: Deploy to EC2
+          deployment: production
+          script:
+            - apt-get update && apt-get install -y openssh-client
+            - mkdir -p ~/.ssh
+
+            # ✅ Save the EC2 private key to a file
+            - echo "$EC2_DEPLOY_KEY" > ~/.ssh/id_rsa
+            - chmod 600 ~/.ssh/id_rsa
+
+            # ✅ Start ssh-agent and add the key
+            - eval "$(ssh-agent -s)"
+            - ssh-add ~/.ssh/id_rsa
+
+            # ✅ Add EC2 server to known_hosts
+            - ssh-keyscan -H 52.73.120.130 >> ~/.ssh/known_hostsw
+
+            # ✅ Run your deployment script on EC2
+            - echo "Running deploy.sh on EC2..."
+            - ssh -o StrictHostKeyChecking=no ubuntu@52.73.120.130 'bash /var/www/html/digital-invoicing/deploy.sh'
+
+            - echo "✅ Deployment finished successfully."
