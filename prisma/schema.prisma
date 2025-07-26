@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ────────────────────────────────────────────────
+// Global Schema
+// ────────────────────────────────────────────────
+
+model AdminUser {
+  id         BigInt      @id @default(autoincrement())
+  email      String      @unique
+  hashpass   String
+  fullName   String
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  userTokens UserToken[] @relation("AdminUserTokens")
+}
+
+// ────────────────────────────────────────────────
+// Tenant Schema
+// ────────────────────────────────────────────────
+
+model Company {
+  id                  BigInt   @id @default(autoincrement())
+  companyName         String
+  phone               String
+  addressStreet1      String
+  addressStreet2      String
+  city                String
+  state               String
+  zipCode             String
+  countryCode         String
+  fbrToken            String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  employees           User[]
+}
+
+model Role {
+  id              BigInt   @id @default(autoincrement())
+  roleName        RoleName @unique
+  roleDescription String
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  employees       User[]
+}
+
+model User {
+  id              BigInt     @id @default(autoincrement())
+  companyId    BigInt
+  roleId          BigInt
+  email           String     @unique
+  hashpass        String
+  firstName       String
+  lastName        String
+  phone           String
+  isActive        Boolean
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  company    Company    @relation(fields: [companyId], references: [id])
+  role          Role          @relation(fields: [roleId], references: [id])
+  userTokens    UserToken[]
+
+  @@unique([companyId, email])
+}
+
+model UserToken {
+  id           BigInt   @id @default(autoincrement())
+  companyId   BigInt?
+  employeeId   BigInt?
+  adminUserId  BigInt?
+  accessToken  String
+  refreshToken String   @unique
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  employee   User?   @relation(fields: [employeeId], references: [id])
+  adminUser  AdminUser?  @relation("AdminUserTokens", fields: [adminUserId], references: [id])
+}
+
+enum RoleName {
+  SuperAdmin
+  Admin
+  User
+}
