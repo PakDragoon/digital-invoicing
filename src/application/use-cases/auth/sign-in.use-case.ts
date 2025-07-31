@@ -36,15 +36,15 @@ export class SignInUseCase {
   ) {}
 
   async execute(
-    authDto: AuthDto & { userType: "Admin" | "employee" },
+    authDto: AuthDto & { userType: "SuperAdmin" | "Admin" },
   ): Promise<GlobalResponseDto<any>> {
     this.logger.log(
       `Sign-in attempt for: ${authDto.email} as ${authDto.userType}`,
     );
 
     let user;
-    const isAdmin = authDto.userType === RoleName.Admin;
-    let role: string | undefined = isAdmin ? RoleName.Admin : undefined;
+    const isAdmin = authDto.userType === RoleName.SuperAdmin;
+    let role: string | undefined = isAdmin ? RoleName.SuperAdmin : undefined;
 
     try {
       if (isAdmin) {

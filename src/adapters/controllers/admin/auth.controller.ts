@@ -73,7 +73,7 @@ export class AdminAuthController {
     this.logger.log(`Admin login request: ${body.email}`);
     const authResponse = await this.signInUseCase.execute({
       ...body,
-      userType: RoleName.Admin,
+      userType: RoleName.SuperAdmin,
     });
     return GlobalResponseDto.success<{ token: string }>(
       "Login successful",

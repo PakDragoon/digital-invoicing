@@ -40,7 +40,7 @@ export class EmployeeAuthController {
   })
   async login(@Body() body: AuthDto) {
     this.logger.log(`Employee login request for: ${body.email}`);
-    return this.signInUseCase.execute({ ...body, userType: "employee" });
+    return this.signInUseCase.execute({ ...body, userType: "Admin" });
   }
 
   @Post("refresh")
