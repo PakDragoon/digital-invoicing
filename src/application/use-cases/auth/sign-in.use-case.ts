@@ -17,7 +17,7 @@ import {
   EMPLOYEE_REPOSITORY,
   USER_TOKEN_REPOSITORY,
 } from "src/infrastructure/repositories.module";
-import { PrismaService } from "../../../infrastructure/orm/prisma.service";
+import { PrismaService } from "src/infrastructure/orm/prisma.service";
 
 @Injectable()
 export class SignInUseCase {

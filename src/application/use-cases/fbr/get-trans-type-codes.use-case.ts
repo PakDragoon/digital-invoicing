@@ -17,10 +17,10 @@ export class GetTrasnTypeCodesUseCase {
     private readonly fbrRepository: IFbrRepository,
   ) {}
 
-  async execute(): Promise<GlobalResponseDto<any>> {
+  async execute(companyId: bigint): Promise<GlobalResponseDto<any>> {
     this.logger.log("⚡ Fetching transaction type codes");
     try {
-      const data = await this.fbrRepository.getTransTypeCodes();
+      const data = await this.fbrRepository.getTransTypeCodes(companyId);
       return GlobalResponseDto.success(
         "Transaction types fetched successfully",
         data,

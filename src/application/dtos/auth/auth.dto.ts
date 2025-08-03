@@ -10,7 +10,7 @@ export class AuthDto {
   @IsNotEmpty({ message: "Email is required" })
   email: string;
 
-  @ApiProperty({ example: "Employee@123", description: "User Password" })
+  @ApiProperty({ example: "Admin@123", description: "User Password" })
   @IsString()
   @IsNotEmpty({ message: "Password is required" })
   password: string;

@@ -18,6 +18,7 @@ export class GetSalesTypeToRateUseCase {
   ) {}
 
   async execute(
+    companyId: bigint,
     date: string,
     transTypeId: number,
     origSupplier?: number,
@@ -27,6 +28,7 @@ export class GetSalesTypeToRateUseCase {
     );
     try {
       const data = await this.fbrRepository.getSaleTypeToRate(
+        companyId,
         date,
         transTypeId,
         origSupplier,

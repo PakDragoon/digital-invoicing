@@ -64,7 +64,6 @@ export class EmployeeController {
     status: 403,
     description: "Forbidden - Insufficient Permissions",
   })
-  @Roles(RoleName.Admin)
   async create(
     @Body() body: CreateEmployeeDto,
   ): Promise<GlobalResponseDto<any>> {
@@ -84,7 +83,6 @@ export class EmployeeController {
     description: "Forbidden - Insufficient Permissions",
   })
   @ApiQuery({ name: "companyId", required: true, type: "String" })
-  @Roles(RoleName.Admin)
   async getAll(
     @Req() request: Request & { user: TokenEntity },
     @Query("companyId") companyId: string,
@@ -109,14 +107,17 @@ export class EmployeeController {
     description: "Forbidden - Insufficient Permissions",
   })
   @ApiQuery({ name: "companyId", required: true, type: "String" })
-  @Roles(RoleName.Admin)
   async getById(
     @Req() request: Request & { user: TokenEntity },
     @Param("employeeId") employeeId: string,
     @Query("companyId") companyId: string,
   ): Promise<GlobalResponseDto<EmployeeEntity | null>> {
     const { id, role } = request.user;
-    const allowedRoles: RoleName[] = [RoleName.Admin];
+    const allowedRoles: RoleName[] = [
+      RoleName.Admin,
+      RoleName.SuperAdmin,
+      RoleName.User,
+    ];
     const isSelf = id === employeeId;
     const isPrivileged = allowedRoles.includes(role);
 
@@ -148,7 +149,11 @@ export class EmployeeController {
     @Param("employeeId") employeeId: string,
   ): Promise<GlobalResponseDto<EmployeeEntity>> {
     const { id, role } = request.user;
-    const allowedRoles: RoleName[] = [RoleName.Admin];
+    const allowedRoles: RoleName[] = [
+      RoleName.Admin,
+      RoleName.SuperAdmin,
+      RoleName.User,
+    ];
     const isSelf = id === employeeId;
     const isPrivileged = allowedRoles.includes(role);
 
@@ -173,7 +178,6 @@ export class EmployeeController {
     description: "Forbidden - Insufficient Permissions",
   })
   @ApiQuery({ name: "companyId", required: true, type: "String" })
-  @Roles(RoleName.Admin)
   async delete(
     @Param("employeeId") employeeId: string,
     @Query("companyId") companyId: string,

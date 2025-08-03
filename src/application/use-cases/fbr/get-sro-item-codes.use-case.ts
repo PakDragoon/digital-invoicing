@@ -17,10 +17,10 @@ export class GetSroItemCodesUseCase {
     private readonly fbrRepository: IFbrRepository,
   ) {}
 
-  async execute(): Promise<GlobalResponseDto<any>> {
+  async execute(companyId: bigint): Promise<GlobalResponseDto<any>> {
     this.logger.log("⚡ Fetching SRO item codes");
     try {
-      const data = await this.fbrRepository.getSroItemCodes();
+      const data = await this.fbrRepository.getSroItemCodes(companyId);
       return GlobalResponseDto.success(
         "SRO item codes fetched successfully",
         data,

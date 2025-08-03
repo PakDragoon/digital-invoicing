@@ -18,6 +18,7 @@ export class GetSroScheduleUseCase {
   ) {}
 
   async execute(
+    companyId: bigint,
     rateId: number,
     date: string,
     origCsv?: number,
@@ -25,6 +26,7 @@ export class GetSroScheduleUseCase {
     this.logger.log(`⚡ Fetching SRO schedule rate=${rateId} date=${date}`);
     try {
       const data = await this.fbrRepository.getSroSchedule(
+        companyId,
         rateId,
         date,
         origCsv,

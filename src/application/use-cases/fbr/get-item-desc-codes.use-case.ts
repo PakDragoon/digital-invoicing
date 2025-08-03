@@ -17,10 +17,10 @@ export class GetItemDescCodesUseCase {
     private readonly fbrRepository: IFbrRepository,
   ) {}
 
-  async execute(): Promise<GlobalResponseDto<any>> {
+  async execute(companyId: bigint): Promise<GlobalResponseDto<any>> {
     this.logger.log("⚡ Fetching HS codes");
     try {
-      const data = await this.fbrRepository.getHSCodes();
+      const data = await this.fbrRepository.getHSCodes(companyId);
       return GlobalResponseDto.success("HS codes fetched successfully", data);
     } catch (e) {
       this.logger.error("Failed to fetch HS codes", e.stack);

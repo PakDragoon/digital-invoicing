@@ -17,13 +17,16 @@ export class PostStatusUseCase {
     private readonly fbrRepository: IFbrRepository,
   ) {}
 
-  async execute(body: {
-    regno: string;
-    date: string;
-  }): Promise<GlobalResponseDto<any>> {
+  async execute(
+    companyId: bigint,
+    body: {
+      regno: string;
+      date: string;
+    },
+  ): Promise<GlobalResponseDto<any>> {
     this.logger.log(`⚡ Posting statl for regno=${body.regno}`);
     try {
-      const data = await this.fbrRepository.postStatl(body);
+      const data = await this.fbrRepository.postStatl(companyId, body);
       return GlobalResponseDto.success("Statl posted successfully", data);
     } catch (e) {
       this.logger.error("Failed to post statl", e.stack);

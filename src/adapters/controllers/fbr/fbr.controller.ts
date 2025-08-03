@@ -1,10 +1,12 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
   Logger,
   Post,
   Query,
+  Req,
   UseGuards,
 } from "@nestjs/common";
 import {
@@ -32,6 +34,8 @@ import {
 import { CompanyGuard } from "src/common/security/guards/company.guard";
 import { JwtAuthGuard } from "src/common/security/guards/jwt-auth.guard";
 import { RolesGuard } from "src/common/security/guards/roles.guard";
+import { Request } from "express";
+import { TokenEntity } from "src/domain/entities/token.entity";
 
 @ApiTags("FBR Management")
 @ApiBearerAuth()
@@ -62,9 +66,13 @@ export class FbrController {
     description: "Provinces fetched successfully.",
     type: GlobalResponseDto,
   })
-  async getProvinces(): Promise<GlobalResponseDto<any>> {
+  async getProvinces(
+    @Req() request: Request & { user: TokenEntity },
+  ): Promise<GlobalResponseDto<any>> {
     this.logger.log(`Received request to fetch provinces`);
-    return this.getProvincesUseCase.execute();
+    const { companyId } = request.user;
+    if (!companyId) throw new BadRequestException("CompanyId is missing.");
+    return this.getProvincesUseCase.execute(BigInt(companyId));
   }
 
   @Get("doctypecode")
@@ -74,9 +82,13 @@ export class FbrController {
     description: "Invoice types fetched successfully.",
     type: GlobalResponseDto,
   })
-  async getInvoiceTypes(): Promise<GlobalResponseDto<any>> {
+  async getInvoiceTypes(
+    @Req() request: Request & { user: TokenEntity },
+  ): Promise<GlobalResponseDto<any>> {
     this.logger.log(`Received request to fetch invoice types`);
-    return this.getInvoiceTypesUseCase.execute();
+    const { companyId } = request.user;
+    if (!companyId) throw new BadRequestException("CompanyId is missing.");
+    return this.getInvoiceTypesUseCase.execute(BigInt(companyId));
   }
 
   @Get("itemdesccode")
@@ -86,9 +98,13 @@ export class FbrController {
     description: "HS codes fetched successfully.",
     type: GlobalResponseDto,
   })
-  async getHSCodes(): Promise<GlobalResponseDto<any>> {
+  async getHSCodes(
+    @Req() request: Request & { user: TokenEntity },
+  ): Promise<GlobalResponseDto<any>> {
     this.logger.log(`Received request to fetch HS codes`);
-    return this.getItemDescCodesUseCase.execute();
+    const { companyId } = request.user;
+    if (!companyId) throw new BadRequestException("CompanyId is missing.");
+    return this.getItemDescCodesUseCase.execute(BigInt(companyId));
   }
 
   @Get("sroitemcode")
@@ -98,9 +114,13 @@ export class FbrController {
     description: "SRO item codes fetched successfully.",
     type: GlobalResponseDto,
   })
-  async getSroItemCodes(): Promise<GlobalResponseDto<any>> {
+  async getSroItemCodes(
+    @Req() request: Request & { user: TokenEntity },
+  ): Promise<GlobalResponseDto<any>> {
     this.logger.log(`Received request to fetch SRO item codes`);
-    return this.getSroItemCodesUseCase.execute();
+    const { companyId } = request.user;
+    if (!companyId) throw new BadRequestException("CompanyId is missing.");
+    return this.getSroItemCodesUseCase.execute(BigInt(companyId));
   }
 
   @Get("transtypecode")
@@ -110,9 +130,13 @@ export class FbrController {
     description: "Transaction types fetched successfully.",
     type: GlobalResponseDto,
   })
-  async getTransTypeCodes(): Promise<GlobalResponseDto<any>> {
+  async getTransTypeCodes(
+    @Req() request: Request & { user: TokenEntity },
+  ): Promise<GlobalResponseDto<any>> {
     this.logger.log(`Received request to fetch transaction type codes`);
-    return this.getTrasnTypeCodesUseCase.execute();
+    const { companyId } = request.user;
+    if (!companyId) throw new BadRequestException("CompanyId is missing.");
+    return this.getTrasnTypeCodesUseCase.execute(BigInt(companyId));
   }
 
   @Get("uom")
@@ -122,9 +146,13 @@ export class FbrController {
     description: "Units of measure fetched successfully.",
     type: GlobalResponseDto,
   })
-  async getUom(): Promise<GlobalResponseDto<any>> {
+  async getUom(
+    @Req() request: Request & { user: TokenEntity },
+  ): Promise<GlobalResponseDto<any>> {
     this.logger.log(`Received request to fetch UOM`);
-    return this.getUomUseCase.execute();
+    const { companyId } = request.user;
+    if (!companyId) throw new BadRequestException("CompanyId is missing.");
+    return this.getUomUseCase.execute(BigInt(companyId));
   }
 
   @Get("SroSchedule")
@@ -142,6 +170,7 @@ export class FbrController {
     type: GlobalResponseDto,
   })
   async getSroSchedule(
+    @Req() request: Request & { user: TokenEntity },
     @Query("rate_id") rateId: number,
     @Query("date") date: string,
     @Query("origination_supplier_csv") origCsv?: number,
@@ -149,7 +178,14 @@ export class FbrController {
     this.logger.log(
       `Received request for SRO schedule rate=${rateId} date=${date}`,
     );
-    return this.getSroScheduleUseCase.execute(rateId, date, origCsv);
+    const { companyId } = request.user;
+    if (!companyId) throw new BadRequestException("CompanyId is missing.");
+    return this.getSroScheduleUseCase.execute(
+      BigInt(companyId),
+      rateId,
+      date,
+      origCsv,
+    );
   }
 
   @Get("SaleTypeToRate")
@@ -163,6 +199,7 @@ export class FbrController {
     type: GlobalResponseDto,
   })
   async getSaleTypeToRate(
+    @Req() request: Request & { user: TokenEntity },
     @Query("date") date: string,
     @Query("transTypeId") transTypeId: number,
     @Query("originationSupplier") origSupplier?: number,
@@ -170,7 +207,10 @@ export class FbrController {
     this.logger.log(
       `Received request for SaleTypeToRate date=${date} type=${transTypeId}`,
     );
+    const { companyId } = request.user;
+    if (!companyId) throw new BadRequestException("CompanyId is missing.");
     return this.getSalesTypeToRateUseCase.execute(
+      BigInt(companyId),
       date,
       transTypeId,
       origSupplier,
@@ -187,13 +227,16 @@ export class FbrController {
     type: GlobalResponseDto,
   })
   async getHsUom(
+    @Req() request: Request & { user: TokenEntity },
     @Query("hs_code") hsCode: string,
     @Query("annexure_id") annexureId: number,
   ): Promise<GlobalResponseDto<any>> {
     this.logger.log(
       `Received request for HS_UOM hs=${hsCode} annexure=${annexureId}`,
     );
-    return this.getHsUomUseCase.execute(hsCode, annexureId);
+    const { companyId } = request.user;
+    if (!companyId) throw new BadRequestException("CompanyId is missing.");
+    return this.getHsUomUseCase.execute(BigInt(companyId), hsCode, annexureId);
   }
 
   @Get("SROItem")
@@ -206,11 +249,14 @@ export class FbrController {
     type: GlobalResponseDto,
   })
   async getSroItem(
+    @Req() request: Request & { user: TokenEntity },
     @Query("date") date: string,
     @Query("sro_id") sroId: number,
   ): Promise<GlobalResponseDto<any>> {
     this.logger.log(`Received request for SROItem date=${date} id=${sroId}`);
-    return this.getSroItemUseCase.execute(date, sroId);
+    const { companyId } = request.user;
+    if (!companyId) throw new BadRequestException("CompanyId is missing.");
+    return this.getSroItemUseCase.execute(BigInt(companyId), date, sroId);
   }
 
   @Post("statl")
@@ -221,10 +267,13 @@ export class FbrController {
     type: GlobalResponseDto,
   })
   async postStatl(
+    @Req() request: Request & { user: TokenEntity },
     @Body() body: { regno: string; date: string },
   ): Promise<GlobalResponseDto<any>> {
     this.logger.log(`Received request to post statl for regno=${body.regno}`);
-    return this.postStatusUseCase.execute(body);
+    const { companyId } = request.user;
+    if (!companyId) throw new BadRequestException("CompanyId is missing.");
+    return this.postStatusUseCase.execute(BigInt(companyId), body);
   }
 
   @Post("Get_Reg_Type")
@@ -235,11 +284,14 @@ export class FbrController {
     type: GlobalResponseDto,
   })
   async getRegType(
+    @Req() request: Request & { user: TokenEntity },
     @Body() body: { Registration_No: string },
   ): Promise<GlobalResponseDto<any>> {
     this.logger.log(
       `Received request to fetch registration type for ${body.Registration_No}`,
     );
-    return this.getRegTypeUseCase.execute(body);
+    const { companyId } = request.user;
+    if (!companyId) throw new BadRequestException("CompanyId is missing.");
+    return this.getRegTypeUseCase.execute(BigInt(companyId), body);
   }
 }

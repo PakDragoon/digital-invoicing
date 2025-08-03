@@ -17,10 +17,14 @@ export class GetSroItemUseCase {
     private readonly fbrRepository: IFbrRepository,
   ) {}
 
-  async execute(date: string, sroId: number): Promise<GlobalResponseDto<any>> {
+  async execute(
+    companyId: bigint,
+    date: string,
+    sroId: number,
+  ): Promise<GlobalResponseDto<any>> {
     this.logger.log(`⚡ Fetching SROItem date=${date}`);
     try {
-      const data = await this.fbrRepository.getSroItem(date, sroId);
+      const data = await this.fbrRepository.getSroItem(companyId, date, sroId);
       return GlobalResponseDto.success("SRO item fetched successfully", data);
     } catch (e) {
       this.logger.error("Failed to fetch SRO item", e.stack);

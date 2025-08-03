@@ -1,15 +1,30 @@
-
 export interface IFbrRepository {
-  getProvinces(): Promise<any[]>;
-  getInvoiceTypes(): Promise<any[]>;
-  getHSCodes(): Promise<any[]>;
-  getSroItemCodes(): Promise<any[]>;
-  getTransTypeCodes(): Promise<any[]>;
-  getUom(): Promise<any[]>;
-  getSroSchedule(rateId: number, date: string, origCsv?: number): Promise<any>;
-  getSaleTypeToRate(date: string, transTypeId: number, origSupplier?: number): Promise<any>;
-  getHsUom(hsCode: string, annexureId: number): Promise<any>;
-  getSroItem(date: string, sroId: number): Promise<any>;
-  postStatl(body: { regno: string; date: string }): Promise<any>;
-  getRegType(body: { Registration_No: string }): Promise<any>;
+  getProvinces(companyId: bigint): Promise<any[]>;
+  getInvoiceTypes(companyId: bigint): Promise<any[]>;
+  getHSCodes(companyId: bigint): Promise<any[]>;
+  getSroItemCodes(companyId: bigint): Promise<any[]>;
+  getTransTypeCodes(companyId: bigint): Promise<any[]>;
+  getUom(companyId: bigint): Promise<any[]>;
+  getSroSchedule(
+    companyId: bigint,
+    rateId: number,
+    date: string,
+    origCsv?: number,
+  ): Promise<any>;
+  getSaleTypeToRate(
+    companyId: bigint,
+    date: string,
+    transTypeId: number,
+    origSupplier?: number,
+  ): Promise<any>;
+  getHsUom(companyId: bigint, hsCode: string, annexureId: number): Promise<any>;
+  getSroItem(companyId: bigint, date: string, sroId: number): Promise<any>;
+  postStatl(
+    companyId: bigint,
+    body: { regno: string; date: string },
+  ): Promise<any>;
+  getRegType(
+    companyId: bigint,
+    body: { Registration_No: string },
+  ): Promise<any>;
 }

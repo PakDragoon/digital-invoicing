@@ -17,10 +17,10 @@ export class GetInvoiceTypesUseCase {
     private readonly fbrRepository: IFbrRepository,
   ) {}
 
-  async execute(): Promise<GlobalResponseDto<any>> {
+  async execute(companyId: bigint): Promise<GlobalResponseDto<any>> {
     this.logger.log("⚡ Fetching invoice types");
     try {
-      const data = await this.fbrRepository.getInvoiceTypes();
+      const data = await this.fbrRepository.getInvoiceTypes(companyId);
       return GlobalResponseDto.success(
         "Invoice types fetched successfully",
         data,

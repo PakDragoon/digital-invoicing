@@ -21,12 +21,15 @@ export class CreateEmployeeDto {
   @IsNotEmpty()
   roleId: string;
 
-  @ApiProperty({ example: "user@digitalinvoicing.com", description: "Employee Email" })
+  @ApiProperty({
+    example: "user@digitalinvoicing.com",
+    description: "Employee Email",
+  })
   @IsEmail()
   email: string;
 
   @ApiProperty({
-    example: "SecurePass123",
+    example: "Employee@123",
     description: "Password (Min length 6)",
   })
   @IsString()

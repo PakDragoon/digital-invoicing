@@ -17,10 +17,10 @@ export class GetUomUseCase {
     private readonly fbrRepository: IFbrRepository,
   ) {}
 
-  async execute(): Promise<GlobalResponseDto<any>> {
+  async execute(companyId: bigint): Promise<GlobalResponseDto<any>> {
     this.logger.log("⚡ Fetching UOM");
     try {
-      const data = await this.fbrRepository.getUom();
+      const data = await this.fbrRepository.getUom(companyId);
       return GlobalResponseDto.success(
         "Units of measure fetched successfully",
         data,

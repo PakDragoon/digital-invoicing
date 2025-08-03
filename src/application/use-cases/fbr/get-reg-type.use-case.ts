@@ -17,14 +17,17 @@ export class GetRegTypeUseCase {
     private readonly fbrRepository: IFbrRepository,
   ) {}
 
-  async execute(body: {
-    Registration_No: string;
-  }): Promise<GlobalResponseDto<any>> {
+  async execute(
+    companyId: bigint,
+    body: {
+      Registration_No: string;
+    },
+  ): Promise<GlobalResponseDto<any>> {
     this.logger.log(
       `⚡ Fetching registration type for ${body.Registration_No}`,
     );
     try {
-      const data = await this.fbrRepository.getRegType(body);
+      const data = await this.fbrRepository.getRegType(companyId, body);
       return GlobalResponseDto.success(
         "Registration type fetched successfully",
         data,

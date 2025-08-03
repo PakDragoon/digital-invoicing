@@ -17,10 +17,10 @@ export class GetProvincesUseCase {
     private readonly fbrRepository: IFbrRepository,
   ) {}
 
-  async execute(): Promise<GlobalResponseDto<any>> {
+  async execute(companyId: bigint): Promise<GlobalResponseDto<any>> {
     this.logger.log("⚡ Fetching provinces from FBR");
     try {
-      const data = await this.fbrRepository.getProvinces();
+      const data = await this.fbrRepository.getProvinces(companyId);
       this.logger.log("🎉 Provinces fetched successfully");
       return GlobalResponseDto.success("Provinces fetched successfully", data);
     } catch (e) {

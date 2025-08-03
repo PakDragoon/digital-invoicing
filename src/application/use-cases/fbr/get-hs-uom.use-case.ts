@@ -18,12 +18,17 @@ export class GetHsUomUseCase {
   ) {}
 
   async execute(
+    companyId: bigint,
     hsCode: string,
     annexureId: number,
   ): Promise<GlobalResponseDto<any>> {
     this.logger.log(`⚡ Fetching HS_UOM hs=${hsCode}`);
     try {
-      const data = await this.fbrRepository.getHsUom(hsCode, annexureId);
+      const data = await this.fbrRepository.getHsUom(
+        companyId,
+        hsCode,
+        annexureId,
+      );
       return GlobalResponseDto.success("HS UOM fetched successfully", data);
     } catch (e) {
       this.logger.error("Failed to fetch HS UOM", e.stack);

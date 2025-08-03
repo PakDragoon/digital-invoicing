@@ -18,22 +18,31 @@ export class PrismaFbrRepository implements IFbrRepository {
     private readonly prisma: PrismaService,
   ) {}
 
-  private async getTokenForCompany(companyId: string): Promise<string> {
+  private async getTokenForCompany(companyId: bigint): Promise<string> {
+    const isDev = process.env.NODE_ENV === "development";
+
     const company = await this.prisma.company.findUnique({
-      where: { id: BigInt(companyId) },
-      select: { fbrToken: true },
+      where: { id: companyId },
+      select: {
+        fbrToken: !isDev,
+        fbrDevToken: isDev,
+      },
     });
-    if (!company?.fbrToken) {
+
+    const token = isDev ? company?.fbrDevToken : company?.fbrToken;
+
+    if (!token) {
       throw new InternalServerErrorException(
-        "FBR token not configured for your company",
+        `FBR ${isDev ? "Dev " : ""}token not configured for your company`,
       );
     }
-    return company.fbrToken;
+
+    return token;
   }
 
-  async getProvinces(): Promise<any[]> {
+  async getProvinces(companyId: bigint): Promise<any[]> {
     try {
-      const token = await this.getTokenForCompany("1");
+      const token = await this.getTokenForCompany(companyId);
       const res = await firstValueFrom(
         this.httpService.get(`${this.base}/pdi/v1/provinces`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -46,10 +55,13 @@ export class PrismaFbrRepository implements IFbrRepository {
     }
   }
 
-  async getInvoiceTypes(): Promise<any[]> {
+  async getInvoiceTypes(companyId: bigint): Promise<any[]> {
     try {
+      const token = await this.getTokenForCompany(companyId);
       const res = await firstValueFrom(
-        this.httpService.get(`${this.base}/pdi/v1/doctypecode`),
+        this.httpService.get(`${this.base}/pdi/v1/doctypecode`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       );
       return res.data;
     } catch (e) {
@@ -58,10 +70,13 @@ export class PrismaFbrRepository implements IFbrRepository {
     }
   }
 
-  async getHSCodes(): Promise<any[]> {
+  async getHSCodes(companyId: bigint): Promise<any[]> {
     try {
+      const token = await this.getTokenForCompany(companyId);
       const res = await firstValueFrom(
-        this.httpService.get(`${this.base}/pdi/v1/itemdesccode`),
+        this.httpService.get(`${this.base}/pdi/v1/itemdesccode`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       );
       return res.data;
     } catch (e) {
@@ -70,10 +85,13 @@ export class PrismaFbrRepository implements IFbrRepository {
     }
   }
 
-  async getSroItemCodes(): Promise<any[]> {
+  async getSroItemCodes(companyId: bigint): Promise<any[]> {
     try {
+      const token = await this.getTokenForCompany(companyId);
       const res = await firstValueFrom(
-        this.httpService.get(`${this.base}/pdi/v1/sroitemcode`),
+        this.httpService.get(`${this.base}/pdi/v1/sroitemcode`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       );
       return res.data;
     } catch (e) {
@@ -82,10 +100,13 @@ export class PrismaFbrRepository implements IFbrRepository {
     }
   }
 
-  async getTransTypeCodes(): Promise<any[]> {
+  async getTransTypeCodes(companyId: bigint): Promise<any[]> {
     try {
+      const token = await this.getTokenForCompany(companyId);
       const res = await firstValueFrom(
-        this.httpService.get(`${this.base}/pdi/v1/transtypecode`),
+        this.httpService.get(`${this.base}/pdi/v1/transtypecode`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       );
       return res.data;
     } catch (e) {
@@ -94,10 +115,13 @@ export class PrismaFbrRepository implements IFbrRepository {
     }
   }
 
-  async getUom(): Promise<any[]> {
+  async getUom(companyId: bigint): Promise<any[]> {
     try {
+      const token = await this.getTokenForCompany(companyId);
       const res = await firstValueFrom(
-        this.httpService.get(`${this.base}/pdi/v1/uom`),
+        this.httpService.get(`${this.base}/pdi/v1/uom`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       );
       return res.data;
     } catch (e) {
@@ -107,13 +131,16 @@ export class PrismaFbrRepository implements IFbrRepository {
   }
 
   async getSroSchedule(
+    companyId: bigint,
     rateId: number,
     date: string,
     origCsv = 0,
   ): Promise<any> {
     try {
+      const token = await this.getTokenForCompany(companyId);
       const res = await firstValueFrom(
         this.httpService.get(`${this.base}/pdi/v1/SroSchedule`, {
+          headers: { Authorization: `Bearer ${token}` },
           params: { rate_id: rateId, date, origination_supplier_csv: origCsv },
         }),
       );
@@ -125,13 +152,16 @@ export class PrismaFbrRepository implements IFbrRepository {
   }
 
   async getSaleTypeToRate(
+    companyId: bigint,
     date: string,
     transTypeId: number,
     origSupplier = 0,
   ): Promise<any> {
     try {
+      const token = await this.getTokenForCompany(companyId);
       const res = await firstValueFrom(
         this.httpService.get(`${this.base}/pdi/v2/SaleTypeToRate`, {
+          headers: { Authorization: `Bearer ${token}` },
           params: { date, transTypeId, originationSupplier: origSupplier },
         }),
       );
@@ -142,10 +172,16 @@ export class PrismaFbrRepository implements IFbrRepository {
     }
   }
 
-  async getHsUom(hsCode: string, annexureId: number): Promise<any> {
+  async getHsUom(
+    companyId: bigint,
+    hsCode: string,
+    annexureId: number,
+  ): Promise<any> {
     try {
+      const token = await this.getTokenForCompany(companyId);
       const res = await firstValueFrom(
         this.httpService.get(`${this.base}/pdi/v2/HS_UOM`, {
+          headers: { Authorization: `Bearer ${token}` },
           params: { hs_code: hsCode, annexure_id: annexureId },
         }),
       );
@@ -156,10 +192,16 @@ export class PrismaFbrRepository implements IFbrRepository {
     }
   }
 
-  async getSroItem(date: string, sroId: number): Promise<any> {
+  async getSroItem(
+    companyId: bigint,
+    date: string,
+    sroId: number,
+  ): Promise<any> {
     try {
+      const token = await this.getTokenForCompany(companyId);
       const res = await firstValueFrom(
         this.httpService.get(`${this.base}/pdi/v2/SROItem`, {
+          headers: { Authorization: `Bearer ${token}` },
           params: { date, sro_id: sroId },
         }),
       );
@@ -170,10 +212,16 @@ export class PrismaFbrRepository implements IFbrRepository {
     }
   }
 
-  async postStatl(body: { regno: string; date: string }): Promise<any> {
+  async postStatl(
+    companyId: bigint,
+    body: { regno: string; date: string },
+  ): Promise<any> {
     try {
+      const token = await this.getTokenForCompany(companyId);
       const res = await firstValueFrom(
-        this.httpService.post(`${this.base}/dist/v1/statl`, body),
+        this.httpService.post(`${this.base}/dist/v1/statl`, body, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       );
       return res.data;
     } catch (e) {
@@ -182,10 +230,16 @@ export class PrismaFbrRepository implements IFbrRepository {
     }
   }
 
-  async getRegType(body: { Registration_No: string }): Promise<any> {
+  async getRegType(
+    companyId: bigint,
+    body: { Registration_No: string },
+  ): Promise<any> {
     try {
+      const token = await this.getTokenForCompany(companyId);
       const res = await firstValueFrom(
-        this.httpService.post(`${this.base}/dist/v1/Get_Reg_Type`, body),
+        this.httpService.post(`${this.base}/dist/v1/Get_Reg_Type`, body, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       );
       return res.data;
     } catch (e) {
