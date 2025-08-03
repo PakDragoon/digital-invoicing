@@ -4,6 +4,8 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
 import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
 import { setupSecurity } from "./common/config/security.config";
+import { NestExpressApplication } from "@nestjs/platform-express";
+import { join } from "path";
 
 // Convert BigInt values to strings for JSON responses
 (BigInt.prototype as any).toJSON = function () {
@@ -11,7 +13,9 @@ import { setupSecurity } from "./common/config/security.config";
 };
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  app.useStaticAssets(join(__dirname, "..", "public"));
 
   // Apply security middleware (CORS, Helmet)
   setupSecurity(app);
