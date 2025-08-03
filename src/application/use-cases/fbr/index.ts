@@ -10,6 +10,7 @@ import { GetHsUomUseCase } from "./get-hs-uom.use-case";
 import { GetSroItemUseCase } from "./get-sro-item.use-case";
 import { PostStatusUseCase } from "./post-status.use-case";
 import { GetRegTypeUseCase } from "./get-reg-type.use-case";
+import { PostInvoiceDataUseCase } from "./post-invoice-data.use-case";
 
 export {
   GetProvincesUseCase,
@@ -24,4 +25,5 @@ export {
   GetSroItemUseCase,
   PostStatusUseCase,
   GetRegTypeUseCase,
+  PostInvoiceDataUseCase,
 };

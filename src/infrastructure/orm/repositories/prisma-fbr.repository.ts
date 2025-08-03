@@ -7,6 +7,7 @@ import { HttpService } from "@nestjs/axios";
 import { IFbrRepository } from "src/domain/interfaces/fbr-repository.interface";
 import { PrismaService } from "../prisma.service";
 import { firstValueFrom } from "rxjs";
+import { PostInvoiceDataDto } from "src/application/dtos/fbr/invoice.dto";
 
 @Injectable()
 export class PrismaFbrRepository implements IFbrRepository {
@@ -244,6 +245,32 @@ export class PrismaFbrRepository implements IFbrRepository {
       return res.data;
     } catch (e) {
       this.logger.error("Error fetching registration type", e.stack);
+      throw new InternalServerErrorException("FBR API error");
+    }
+  }
+
+  async postInvoiceDataSb(
+    companyId: bigint,
+    body: PostInvoiceDataDto,
+  ): Promise<any> {
+    try {
+      const token = await this.getTokenForCompany(companyId);
+      const res = await firstValueFrom(
+        this.httpService.post(
+          `${this.base}/di_data/v1/di/postinvoicedata_sb`,
+          body,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+              Cookie: "cookiesession1=678B290B0E800E6C131370E585AACB5E",
+            },
+          },
+        ),
+      );
+      return res.data;
+    } catch (e) {
+      this.logger.error("Error posting invoice data", e.stack);
       throw new InternalServerErrorException("FBR API error");
     }
   }

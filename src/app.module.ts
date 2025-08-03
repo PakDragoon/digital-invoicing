@@ -37,6 +37,7 @@ import {
   GetSroItemUseCase,
   PostStatusUseCase,
   GetRegTypeUseCase,
+  PostInvoiceDataUseCase,
 } from "./application/use-cases/fbr";
 import { RepositoriesModule } from "./infrastructure/repositories.module";
 
@@ -90,6 +91,7 @@ import { RepositoriesModule } from "./infrastructure/repositories.module";
     GetSroItemUseCase,
     PostStatusUseCase,
     GetRegTypeUseCase,
+    PostInvoiceDataUseCase,
   ],
 })
 export class AppModule {}

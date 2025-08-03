@@ -1,3 +1,7 @@
+import { PostInvoiceDataDto } from "../../application/dtos/fbr/invoice.dto";
+import { GetRegTypeDto } from "../../application/dtos/fbr/registration.dto";
+import { StatlDto } from "../../application/dtos/fbr/statl.dto";
+
 export interface IFbrRepository {
   getProvinces(companyId: bigint): Promise<any[]>;
   getInvoiceTypes(companyId: bigint): Promise<any[]>;
@@ -19,12 +23,7 @@ export interface IFbrRepository {
   ): Promise<any>;
   getHsUom(companyId: bigint, hsCode: string, annexureId: number): Promise<any>;
   getSroItem(companyId: bigint, date: string, sroId: number): Promise<any>;
-  postStatl(
-    companyId: bigint,
-    body: { regno: string; date: string },
-  ): Promise<any>;
-  getRegType(
-    companyId: bigint,
-    body: { Registration_No: string },
-  ): Promise<any>;
+  postStatl(companyId: bigint, body: StatlDto): Promise<any>;
+  getRegType(companyId: bigint, body: GetRegTypeDto): Promise<any>;
+  postInvoiceDataSb(companyId: bigint, body: PostInvoiceDataDto): Promise<any>;
 }

@@ -30,12 +30,16 @@ import {
   GetSroItemUseCase,
   PostStatusUseCase,
   GetRegTypeUseCase,
+  PostInvoiceDataUseCase,
 } from "src/application/use-cases/fbr";
 import { CompanyGuard } from "src/common/security/guards/company.guard";
 import { JwtAuthGuard } from "src/common/security/guards/jwt-auth.guard";
 import { RolesGuard } from "src/common/security/guards/roles.guard";
 import { Request } from "express";
 import { TokenEntity } from "src/domain/entities/token.entity";
+import { GetRegTypeDto } from "src/application/dtos/fbr/registration.dto";
+import { StatlDto } from "src/application/dtos/fbr/statl.dto";
+import { PostInvoiceDataDto } from "src/application/dtos/fbr/invoice.dto";
 
 @ApiTags("FBR Management")
 @ApiBearerAuth()
@@ -57,6 +61,7 @@ export class FbrController {
     private readonly getSroItemUseCase: GetSroItemUseCase,
     private readonly postStatusUseCase: PostStatusUseCase,
     private readonly getRegTypeUseCase: GetRegTypeUseCase,
+    private readonly postInvoiceDataUseCase: PostInvoiceDataUseCase,
   ) {}
 
   @Get("provinces")
@@ -268,7 +273,7 @@ export class FbrController {
   })
   async postStatl(
     @Req() request: Request & { user: TokenEntity },
-    @Body() body: { regno: string; date: string },
+    @Body() body: StatlDto,
   ): Promise<GlobalResponseDto<any>> {
     this.logger.log(`Received request to post statl for regno=${body.regno}`);
     const { companyId } = request.user;
@@ -285,7 +290,7 @@ export class FbrController {
   })
   async getRegType(
     @Req() request: Request & { user: TokenEntity },
-    @Body() body: { Registration_No: string },
+    @Body() body: GetRegTypeDto,
   ): Promise<GlobalResponseDto<any>> {
     this.logger.log(
       `Received request to fetch registration type for ${body.Registration_No}`,
@@ -293,5 +298,24 @@ export class FbrController {
     const { companyId } = request.user;
     if (!companyId) throw new BadRequestException("CompanyId is missing.");
     return this.getRegTypeUseCase.execute(BigInt(companyId), body);
+  }
+
+  @Post("post_invoice_data_sb")
+  @ApiOperation({ summary: "Post invoice data to FBR" })
+  @ApiResponse({
+    status: 200,
+    description: "Invoice data posted successfully.",
+    type: GlobalResponseDto,
+  })
+  async postInvoiceDataSb(
+    @Req() request: Request & { user: TokenEntity },
+    @Body() body: PostInvoiceDataDto,
+  ): Promise<GlobalResponseDto<any>> {
+    this.logger.log(
+      `Received request to post invoice for ${body.invoiceRefNo}`,
+    );
+    const { companyId } = request.user;
+    if (!companyId) throw new BadRequestException("CompanyId is missing.");
+    return this.postInvoiceDataUseCase.execute(BigInt(companyId), body);
   }
 }
