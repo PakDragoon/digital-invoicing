@@ -46,7 +46,7 @@ async function bootstrap() {
 
   // Use environment variable PORT or default to 8080
   const port = process.env.PORT || 8080;
-  await app.listen(port);
+  await app.listen(port, "0.0.0.0");
 
   console.log(`🚀 Server running at http://localhost:${port}`);
   console.log(
