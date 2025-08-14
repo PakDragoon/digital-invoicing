@@ -15,7 +15,7 @@ export function setupSecurity(app: INestApplication) {
         : [
             //
             /https:\/\/api\.clientdomain\.com/,
-            "https://digital-invoicing-ui.vercel.app/",
+            /https:\/\/digital-invoicing-ui\.vercel\.app\//,
           ];
 
       // Allow requests with no origin (e.g., Postman, mobile apps)
