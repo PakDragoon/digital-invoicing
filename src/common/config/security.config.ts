@@ -10,20 +10,26 @@ export function setupSecurity(app: INestApplication) {
   // - In production, allow specific domains.
   app.enableCors({
     origin: (origin, callback) => {
+      // const allowedOrigins = isDevelopment
+      //   ? [/http:\/\/localhost(:\d+)?/]
+      //   : [
+      //       //
+      //       /https:\/\/api\.clientdomain\.com/,
+      //       /https:\/\/digital-invoicing-ui\.vercel\.app/,
+      //       /https:\/\/digital-invoicing-ui\.vercel\.app\//,
+      //     ];
       const allowedOrigins = isDevelopment
-        ? [/http:\/\/localhost(:\d+)?/]
-        : [
-            //
-            /https:\/\/api\.clientdomain\.com/,
-            /https:\/\/digital-invoicing-ui\.vercel\.app/,
-            /https:\/\/digital-invoicing-ui\.vercel\.app\//,
-          ];
+        ? ["http://localhost:5173"]
+        : ["https://digital-invoicing-ui.vercel.app"];
 
       // Allow requests with no origin (e.g., Postman, mobile apps)
       if (!origin) return callback(null, true);
 
       // Check if any regex pattern matches the origin
-      if (allowedOrigins.some((pattern) => pattern.test(origin))) {
+      // if (allowedOrigins.some((pattern) => pattern.test(origin))) {
+      //   return callback(null, true);
+      // }
+      if (allowedOrigins.some((url) => url === origin)) {
         return callback(null, true);
       }
 
