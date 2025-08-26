@@ -20,7 +20,7 @@ export function setupSecurity(app: INestApplication) {
       //     ];
       const allowedOrigins = isDevelopment
         ? ["http://localhost:5173"]
-        : ["https://digital-invoicing-ui.vercel.app"];
+        : ["https://app.orcavalley.com"];
 
       // Allow requests with no origin (e.g., Postman, mobile apps)
       if (!origin) return callback(null, true);
