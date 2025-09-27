@@ -10,6 +10,7 @@ export function setupSecurity(app: INestApplication) {
   // - In production, allow specific domains.
   app.enableCors({
     origin: (origin, callback) => {
+      return callback(null, true);
       // const allowedOrigins = isDevelopment
       //   ? [/http:\/\/localhost(:\d+)?/]
       //   : [
