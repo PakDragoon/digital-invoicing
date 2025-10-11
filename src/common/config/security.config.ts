@@ -10,27 +10,18 @@ export function setupSecurity(app: INestApplication) {
   // - In production, allow specific domains.
   app.enableCors({
     origin: (origin, callback) => {
-      return callback(null, true);
-      // const allowedOrigins = isDevelopment
-      //   ? [/http:\/\/localhost(:\d+)?/]
-      //   : [
-      //       //
-      //       /https:\/\/api\.clientdomain\.com/,
-      //       /https:\/\/digital-invoicing-ui\.vercel\.app/,
-      //       /https:\/\/digital-invoicing-ui\.vercel\.app\//,
-      //     ];
       const allowedOrigins = isDevelopment
-        ? ["http://localhost:5173"]
-        : ["https://app.orcavalley.com"];
+          ? [/http:\/\/localhost(:\d+)?/]
+          : [
+            //
+            /https:\/\/api\.clientdomain\.com/,
+          ];
 
       // Allow requests with no origin (e.g., Postman, mobile apps)
       if (!origin) return callback(null, true);
 
       // Check if any regex pattern matches the origin
-      // if (allowedOrigins.some((pattern) => pattern.test(origin))) {
-      //   return callback(null, true);
-      // }
-      if (allowedOrigins.some((url) => url === origin)) {
+      if (allowedOrigins.some((pattern) => pattern.test(origin))) {
         return callback(null, true);
       }
 
@@ -39,29 +30,29 @@ export function setupSecurity(app: INestApplication) {
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "userTimezone"],
     exposedHeaders: ["Authorization", "X-Refresh-Token"],
     optionsSuccessStatus: 204,
   });
 
   // Configure Helmet for security headers
   app.use(
-    helmet({
-      crossOriginEmbedderPolicy: false,
-      contentSecurityPolicy: isDevelopment
-        ? false
-        : {
-            directives: {
-              defaultSrc: ["'self'"],
-              scriptSrc: ["'self'", "'unsafe-inline'"],
-              styleSrc: ["'self'", "'unsafe-inline'"],
-              imgSrc: ["'self'", "data:", "https:"],
+      helmet({
+        crossOriginEmbedderPolicy: false,
+        contentSecurityPolicy: isDevelopment
+            ? false
+            : {
+              directives: {
+                defaultSrc: ["'self'"],
+                scriptSrc: ["'self'", "'unsafe-inline'"],
+                styleSrc: ["'self'", "'unsafe-inline'"],
+                imgSrc: ["'self'", "data:", "https:"],
+              },
             },
-          },
-      hsts: isDevelopment
-        ? false
-        : { maxAge: 31536000, includeSubDomains: true, preload: true },
-    }),
+        hsts: isDevelopment
+            ? false
+            : { maxAge: 31536000, includeSubDomains: true, preload: true },
+      }),
   );
 
   // Remove the X-Powered-By header
