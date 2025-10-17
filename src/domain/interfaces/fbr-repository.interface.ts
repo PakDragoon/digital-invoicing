@@ -26,4 +26,8 @@ export interface IFbrRepository {
   postStatl(companyId: bigint, body: StatlDto): Promise<any>;
   getRegType(companyId: bigint, body: GetRegTypeDto): Promise<any>;
   postInvoiceDataSb(companyId: bigint, body: PostInvoiceDataDto): Promise<any>;
+  
+  // Local storage methods for invoice data
+  createLocalInvoice(companyId: bigint, invoiceData: PostInvoiceDataDto, fbrInvoiceId?: string): Promise<any>;
+  updateLocalInvoiceFbrId(invoiceId: bigint, fbrInvoiceId: string): Promise<any>;
 }

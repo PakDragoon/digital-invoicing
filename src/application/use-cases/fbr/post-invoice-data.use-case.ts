@@ -24,11 +24,37 @@ export class PostInvoiceDataUseCase {
   ): Promise<GlobalResponseDto<any>> {
     this.logger.log(`📤 Posting invoice with ref: ${body.invoiceRefNo}`);
     try {
-      const result = await this.fbrRepository.postInvoiceDataSb(
+      // First, store the invoice data locally
+      this.logger.log(`💾 Storing invoice locally with ref: ${body.invoiceRefNo}`);
+      const localInvoice = await this.fbrRepository.createLocalInvoice(
         companyId,
         body,
       );
-      return GlobalResponseDto.success("Invoice posted successfully", result);
+      this.logger.log(`✅ Invoice stored locally with ID: ${localInvoice.id}`);
+
+      // Then, post to FBR API
+      const fbrResult = await this.fbrRepository.postInvoiceDataSb(
+        companyId,
+        body,
+      );
+      this.logger.log(`✅ Invoice posted to FBR successfully`);
+
+      // Extract FBR invoice ID from the response and update local record
+      const fbrInvoiceId = fbrResult?.invoiceId || fbrResult?.id || null;
+      if (fbrInvoiceId) {
+        await this.fbrRepository.updateLocalInvoiceFbrId(
+          localInvoice.id,
+          fbrInvoiceId,
+        );
+        this.logger.log(`✅ FBR invoice ID updated for local invoice: ${localInvoice.id}`);
+      }
+
+      // Return the FBR result with local invoice ID
+      return GlobalResponseDto.success("Invoice posted successfully", {
+        ...fbrResult,
+        localInvoiceId: localInvoice.id.toString(),
+        fbrInvoiceId: fbrInvoiceId,
+      });
     } catch (e) {
       this.logger.error("Failed to post invoice data", e.stack);
       throw new InternalServerErrorException(

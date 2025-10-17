@@ -274,4 +274,127 @@ export class PrismaFbrRepository implements IFbrRepository {
       throw new InternalServerErrorException("FBR API error");
     }
   }
+
+  async createLocalInvoice(
+    companyId: bigint,
+    invoiceData: PostInvoiceDataDto,
+    fbrInvoiceId?: string,
+  ): Promise<any> {
+    try {
+      this.logger.log(
+        `Creating local invoice with ref: ${invoiceData.invoiceRefNo} for company: ${companyId}`,
+      );
+
+      // Check if invoice with same ref number already exists
+      const existingInvoice = await this.prisma.invoice.findFirst({
+        where: {
+          companyId,
+          invoiceRefNo: invoiceData.invoiceRefNo,
+        },
+      });
+
+      if (existingInvoice) {
+        this.logger.warn(
+          `Invoice with ref ${invoiceData.invoiceRefNo} already exists in company ${companyId}`,
+        );
+        throw new Error("An invoice with this reference number already exists.");
+      }
+
+      // Create invoice with items in a transaction
+      const result = await this.prisma.$transaction(async (tx) => {
+        // Create the invoice
+        const invoice = await tx.invoice.create({
+          data: {
+            companyId,
+            fbrInvoiceId: fbrInvoiceId || null,
+            invoiceType: invoiceData.invoiceType,
+            invoiceDate: invoiceData.invoiceDate,
+            invoiceRefNo: invoiceData.invoiceRefNo,
+            scenarioId: invoiceData.scenarioId,
+            sellerNTNCNIC: invoiceData.sellerNTNCNIC,
+            sellerBusinessName: invoiceData.sellerBusinessName,
+            sellerProvince: invoiceData.sellerProvince,
+            sellerAddress: invoiceData.sellerAddress,
+            buyerRegistrationType: invoiceData.buyerRegistrationType,
+            buyerNTNCNIC: invoiceData.buyerNTNCNIC,
+            buyerBusinessName: invoiceData.buyerBusinessName,
+            buyerProvince: invoiceData.buyerProvince,
+            buyerAddress: invoiceData.buyerAddress,
+          },
+        });
+
+        // Create invoice items
+        const items = await Promise.all(
+          invoiceData.items.map((item) =>
+            tx.invoiceItem.create({
+              data: {
+                invoiceId: invoice.id,
+                hsCode: item.hsCode,
+                productDescription: item.productDescription || null,
+                rate: item.rate || null,
+                uoM: item.uoM,
+                quantity: item.quantity,
+                valueSalesExcludingST: item.valueSalesExcludingST,
+                salesTaxApplicable: item.salesTaxApplicable || null,
+                furtherTax: item.furtherTax || null,
+                fedPayable: item.fedPayable || null,
+                discount: item.discount || null,
+                fixedNotifiedValueOrRetailPrice: item.fixedNotifiedValueOrRetailPrice || null,
+                saleType: item.saleType,
+                totalValues: item.totalValues || null,
+                salesTaxWithheldAtSource: item.salesTaxWithheldAtSource || null,
+                extraTax: item.extraTax || null,
+                sroScheduleNo: item.sroScheduleNo || null,
+                sroItemSerialNo: item.sroItemSerialNo || null,
+              },
+            }),
+          ),
+        );
+
+        return { invoice, items };
+      });
+
+      this.logger.log(
+        `✅ Local invoice created successfully with ID: ${result.invoice.id}`,
+      );
+
+      return result.invoice;
+    } catch (error) {
+      this.logger.error(
+        `❌ Database Error: Unable to create local invoice`,
+        error.stack,
+      );
+      throw new InternalServerErrorException(
+        "Database error: Failed to create local invoice.",
+      );
+    }
+  }
+
+  async updateLocalInvoiceFbrId(
+    invoiceId: bigint,
+    fbrInvoiceId: string,
+  ): Promise<any> {
+    try {
+      this.logger.log(`Updating FBR invoice ID for local invoice: ${invoiceId}`);
+
+      const updatedInvoice = await this.prisma.invoice.update({
+        where: { id: invoiceId },
+        data: { fbrInvoiceId },
+      });
+
+      this.logger.log(
+        `✅ FBR invoice ID updated successfully for local invoice: ${invoiceId}`,
+      );
+
+      return updatedInvoice;
+    } catch (error) {
+      this.logger.error(
+        `❌ Database Error: Unable to update FBR invoice ID for local invoice (${invoiceId})`,
+        error.stack,
+      );
+      throw new InternalServerErrorException(
+        "Database error: Failed to update local invoice.",
+      );
+    }
+  }
 }

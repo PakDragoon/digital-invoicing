@@ -41,6 +41,7 @@ model Company {
   updatedAt           DateTime @updatedAt
 
   employees           User[]
+  invoices            Invoice[]
 }
 
 model Role {
@@ -87,6 +88,64 @@ model UserToken {
 
   employee   User?   @relation(fields: [employeeId], references: [id])
   adminUser  AdminUser?  @relation("AdminUserTokens", fields: [adminUserId], references: [id])
+}
+
+model Invoice {
+  id                    BigInt   @id @default(autoincrement())
+  companyId             BigInt
+  fbrInvoiceId          String?  // Invoice ID returned from FBR API
+  invoiceType           String
+  invoiceDate           String
+  invoiceRefNo          String
+  scenarioId            String
+  
+  // Seller Information
+  sellerNTNCNIC         String
+  sellerBusinessName    String
+  sellerProvince        String
+  sellerAddress         String
+  
+  // Buyer Information
+  buyerRegistrationType String
+  buyerNTNCNIC          String
+  buyerBusinessName     String
+  buyerProvince         String
+  buyerAddress          String
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  company               Company      @relation(fields: [companyId], references: [id])
+  items                 InvoiceItem[]
+  
+  @@unique([companyId, invoiceRefNo])
+}
+
+model InvoiceItem {
+  id                              BigInt   @id @default(autoincrement())
+  invoiceId                       BigInt
+  hsCode                          String
+  productDescription              String?
+  rate                            String?
+  uoM                             String
+  quantity                        Decimal
+  valueSalesExcludingST           Decimal
+  salesTaxApplicable              Decimal?
+  furtherTax                      Decimal?
+  fedPayable                      Decimal?
+  discount                        Decimal?
+  fixedNotifiedValueOrRetailPrice Decimal?
+  saleType                        String
+  totalValues                     Decimal?
+  salesTaxWithheldAtSource        Decimal?
+  extraTax                        String?
+  sroScheduleNo                   String?
+  sroItemSerialNo                 String?
+  
+  createdAt                       DateTime @default(now())
+  updatedAt                       DateTime @updatedAt
+  
+  invoice                         Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }
 
 enum RoleName {
