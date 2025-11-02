@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  Inject,
   Logger,
   Post,
   Query,
@@ -40,6 +41,9 @@ import { TokenEntity } from "src/domain/entities/token.entity";
 import { GetRegTypeDto } from "src/application/dtos/fbr/registration.dto";
 import { StatlDto } from "src/application/dtos/fbr/statl.dto";
 import { PostInvoiceDataDto } from "src/application/dtos/fbr/invoice.dto";
+import { Public } from "src/common/decorators/public.decorator";
+import { IFbrRepository } from "src/domain/interfaces/fbr-repository.interface";
+import { FBR_REPOSITORY } from "src/infrastructure/repositories.module";
 
 @ApiTags("FBR Management")
 @ApiBearerAuth()
@@ -62,6 +66,8 @@ export class FbrController {
     private readonly postStatusUseCase: PostStatusUseCase,
     private readonly getRegTypeUseCase: GetRegTypeUseCase,
     private readonly postInvoiceDataUseCase: PostInvoiceDataUseCase,
+    @Inject(FBR_REPOSITORY)
+    private readonly fbrRepository: IFbrRepository,
   ) {}
 
   @Get("provinces")
@@ -317,5 +323,29 @@ export class FbrController {
     const { companyId } = request.user;
     if (!companyId) throw new BadRequestException("CompanyId is missing.");
     return this.postInvoiceDataUseCase.execute(BigInt(companyId), body);
+  }
+
+  @Post("post_invoice_data_sb_public")
+  @Public()
+  @ApiOperation({ summary: "Post invoice data to FBR (Public - No Auth Required)" })
+  @ApiQuery({ name: "companyId", required: true, type: "Number", description: "Company ID" })
+  @ApiResponse({
+    status: 200,
+    description: "Invoice data posted successfully.",
+    type: GlobalResponseDto,
+  })
+  async postInvoiceDataSbPublic(
+    @Query("companyId") companyId: number,
+    @Body() body: PostInvoiceDataDto,
+  ): Promise<GlobalResponseDto<any>> {
+    this.logger.log(
+      `Received public request to post invoice for ${body.invoiceRefNo}`,
+    );
+    if (!companyId) throw new BadRequestException("CompanyId is missing.");
+    const result = await this.fbrRepository.postInvoiceDataSb(
+      BigInt(companyId),
+      body,
+    );
+    return GlobalResponseDto.success("Invoice posted successfully", result);
   }
 }
