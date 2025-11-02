@@ -257,7 +257,7 @@ export class PrismaFbrRepository implements IFbrRepository {
       const token = await this.getTokenForCompany(companyId);
       const res = await firstValueFrom(
         this.httpService.post(
-          `${this.base}/di_data/v1/di/postinvoicedata_sb`,
+          `${this.base}/di_data/v1/di/postinvoicedata`,
           body,
           {
             headers: {
