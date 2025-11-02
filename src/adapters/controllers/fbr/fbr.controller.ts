@@ -44,7 +44,7 @@ import { PostInvoiceDataDto } from "src/application/dtos/fbr/invoice.dto";
 @ApiTags("FBR Management")
 @ApiBearerAuth()
 @Controller("fbr")
-@UseGuards(JwtAuthGuard, RolesGuard, CompanyGuard)
+// @UseGuards(JwtAuthGuard, RolesGuard, CompanyGuard)
 export class FbrController {
   private readonly logger = new Logger(FbrController.name);
 
